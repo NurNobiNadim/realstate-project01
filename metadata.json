@@ -1,0 +1,6 @@
+{
+  "name": "EstateHub Bangladesh",
+  "description": "Complete modern real estate property marketplace for buying, selling, and renting luxury residential and commercial properties in Bangladesh with verified listings, direct inquiries, and viewing scheduling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

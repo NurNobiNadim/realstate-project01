@@ -1,0 +1,144 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with contact info and account role",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "role": { "type": "string", "enum": ["buyer", "owner", "agent", "admin"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "name", "email", "role"]
+    },
+    "Property": {
+      "title": "Property",
+      "description": "Real estate property listing in Bangladesh",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string", "maxLength": 120 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userPhone": { "type": "string", "maxLength": 30 },
+        "title": { "type": "string", "maxLength": 200 },
+        "listingType": { "type": "string", "enum": ["sale", "rent"] },
+        "propertyType": { "type": "string", "enum": ["Apartment", "House", "Villa", "Commercial", "Land/Plot"] },
+        "city": { "type": "string", "maxLength": 80 },
+        "area": { "type": "string", "maxLength": 120 },
+        "address": { "type": "string", "maxLength": 255 },
+        "price": { "type": "number" },
+        "bedrooms": { "type": "number" },
+        "bathrooms": { "type": "number" },
+        "sizeSqft": { "type": "number" },
+        "furnishing": { "type": "string", "enum": ["Furnished", "Semi-Furnished", "Unfurnished"] },
+        "description": { "type": "string", "maxLength": 4000 },
+        "amenities": { "type": "string", "maxLength": 1000 },
+        "images": { "type": "array" },
+        "status": { "type": "string", "enum": ["available", "pending", "sold", "rented"] },
+        "featured": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "title", "listingType", "propertyType", "city", "area", "address", "price", "sizeSqft", "description", "status"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Direct buyer or tenant inquiry regarding a property",
+      "type": "object",
+      "properties": {
+        "propertyId": { "type": "string", "maxLength": 128 },
+        "propertyTitle": { "type": "string", "maxLength": 200 },
+        "targetUserId": { "type": "string", "maxLength": 128 },
+        "senderUserId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderEmail": { "type": "string", "maxLength": 120 },
+        "senderPhone": { "type": "string", "maxLength": 30 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["new", "contacted", "resolved"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["propertyId", "propertyTitle", "senderName", "senderEmail", "senderPhone", "message"]
+    },
+    "ViewingRequest": {
+      "title": "ViewingRequest",
+      "description": "Physical site visit appointment booking for a property",
+      "type": "object",
+      "properties": {
+        "propertyId": { "type": "string", "maxLength": 128 },
+        "propertyTitle": { "type": "string", "maxLength": 200 },
+        "propertyAddress": { "type": "string", "maxLength": 255 },
+        "targetUserId": { "type": "string", "maxLength": 128 },
+        "senderUserId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderEmail": { "type": "string", "maxLength": 120 },
+        "senderPhone": { "type": "string", "maxLength": 30 },
+        "preferredDate": { "type": "string", "maxLength": 30 },
+        "preferredTime": { "type": "string", "maxLength": 50 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "declined", "completed"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["propertyId", "propertyTitle", "senderUserId", "preferredDate", "preferredTime"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "Bookmarked favorite property for a buyer/renter",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "propertyId": { "type": "string", "maxLength": 128 },
+        "propertyTitle": { "type": "string", "maxLength": 200 },
+        "propertyPrice": { "type": "number" },
+        "propertyCity": { "type": "string", "maxLength": 80 },
+        "propertyArea": { "type": "string", "maxLength": 120 },
+        "propertyImage": { "type": "string", "maxLength": 500 },
+        "listingType": { "type": "string", "maxLength": 20 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "propertyId", "propertyTitle", "propertyPrice"]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "General message submitted via the Contact page",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "subject": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 3000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "phone", "subject", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile with role and contact information"
+    },
+    "/properties/{propertyId}": {
+      "schema": "Property",
+      "description": "Real estate property listings"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Property inquiries from prospective buyers or renters"
+    },
+    "/viewingRequests/{requestId}": {
+      "schema": "ViewingRequest",
+      "description": "Scheduled on-site property viewings"
+    },
+    "/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "Saved favorite property records for authenticated users"
+    },
+    "/contactMessages/{messageId}": {
+      "schema": "ContactMessage",
+      "description": "Direct contact inquiries from users and visitors"
+    }
+  }
+}

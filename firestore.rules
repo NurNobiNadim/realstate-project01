@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get, list: if isSignedIn();
+      allow create, update: if isValidId(userId) && (isOwner(userId) || request.resource.data.isSeed == true);
+      allow delete: if false;
+    }
+
+    // Properties: public to browse and read, protected to create/edit/delete, seed-enabled
+    match /properties/{propertyId} {
+      allow read: if true;
+      allow create: if isValidId(propertyId) && (
+        request.resource.data.isSeed == true ||
+        (isSignedIn() && request.resource.data.userId == request.auth.uid)
+      );
+      allow update: if isValidId(propertyId) && (
+        (isSignedIn() && resource.data.userId == request.auth.uid) ||
+        resource.data.isSeed == true
+      );
+      allow delete: if isValidId(propertyId) && (
+        (isSignedIn() && resource.data.userId == request.auth.uid) ||
+        resource.data.isSeed == true
+      );
+    }
+
+    // Inquiries: anyone can submit inquiry, targets & senders can read
+    match /inquiries/{inquiryId} {
+      allow create: if isValidId(inquiryId);
+      allow get: if isValidId(inquiryId) && (
+        resource.data.isSeed == true ||
+        (isSignedIn() && (
+          resource.data.targetUserId == request.auth.uid ||
+          resource.data.senderUserId == request.auth.uid
+        ))
+      );
+      allow list: if isSignedIn() && (
+        resource.data.targetUserId == request.auth.uid ||
+        resource.data.senderUserId == request.auth.uid
+      );
+      allow update, delete: if isValidId(inquiryId) && (
+        resource.data.isSeed == true ||
+        (isSignedIn() && resource.data.targetUserId == request.auth.uid)
+      );
+    }
+
+    // Viewing Requests
+    match /viewingRequests/{requestId} {
+      allow create: if isValidId(requestId) && (
+        request.resource.data.isSeed == true ||
+        (isSignedIn() && request.resource.data.senderUserId == request.auth.uid)
+      );
+      allow get: if isValidId(requestId) && (
+        resource.data.isSeed == true ||
+        (isSignedIn() && (
+          resource.data.targetUserId == request.auth.uid ||
+          resource.data.senderUserId == request.auth.uid
+        ))
+      );
+      allow list: if isSignedIn() && (
+        resource.data.targetUserId == request.auth.uid ||
+        resource.data.senderUserId == request.auth.uid
+      );
+      allow update, delete: if isValidId(requestId) && (
+        resource.data.isSeed == true ||
+        (isSignedIn() && (
+          resource.data.targetUserId == request.auth.uid ||
+          resource.data.senderUserId == request.auth.uid
+        ))
+      );
+    }
+
+    // Favorites: strictly private to each user
+    match /favorites/{favoriteId} {
+      allow create: if isValidId(favoriteId) && isSignedIn() &&
+        request.resource.data.userId == request.auth.uid;
+      allow get, delete: if isValidId(favoriteId) && isSignedIn() &&
+        resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() &&
+        resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Contact Messages: general public submissions
+    match /contactMessages/{messageId} {
+      allow create: if isValidId(messageId);
+      allow get, list: if isSignedIn();
+    }
+  }
+}
